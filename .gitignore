@@ -1,6 +1,7 @@
 graphify-out/
 starter/.dart_tool/
 starter/build/
+starter/test/failures/
 starter/.idea/
 starter/*.iml
 **/Flutter/ephemeral/
