@@ -137,6 +137,11 @@ class ParsingFailure extends SmsFailure {
   const ParsingFailure() : super('The service returned an invalid response.');
 }
 
+class SmsFailureUnknown extends SmsFailure {
+  const SmsFailureUnknown()
+    : super('The service could not complete the request. Please retry.');
+}
+
 class ValidationFailure extends SmsFailure {
   const ValidationFailure(super.message);
 }

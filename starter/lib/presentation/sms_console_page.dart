@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../domain/models.dart';
 import '../theme/app_theme.dart';
 import 'sms_console_controller.dart';
@@ -7,58 +8,62 @@ import 'widgets.dart';
 class SmsConsolePage extends StatelessWidget {
   const SmsConsolePage({
     super.key,
-    required this.controller,
     required this.isDark,
     required this.onToggleTheme,
   });
-  final SmsConsoleController controller;
   final bool isDark;
   final VoidCallback onToggleTheme;
   @override
-  Widget build(BuildContext context) => ListenableBuilder(
-    listenable: controller,
-    builder: (context, _) => Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            _Header(
-              controller: controller,
-              isDark: isDark,
-              onToggleTheme: onToggleTheme,
+  Widget build(BuildContext context) =>
+      BlocBuilder<SmsConsoleCubit, SmsConsoleState>(
+        builder: (context, state) {
+          final cubit = context.read<SmsConsoleCubit>();
+          return Scaffold(
+            body: SafeArea(
+              child: Column(
+                children: [
+                  _Header(
+                    cubit: cubit,
+                    state: state,
+                    isDark: isDark,
+                    onToggleTheme: onToggleTheme,
+                  ),
+                  Expanded(child: _Body(cubit, state)),
+                ],
+              ),
             ),
-            Expanded(child: _Body(controller)),
-          ],
-        ),
-      ),
-    ),
-  );
+          );
+        },
+      );
 }
 
 class _Header extends StatelessWidget {
   const _Header({
-    required this.controller,
+    required this.cubit,
+    required this.state,
     required this.isDark,
     required this.onToggleTheme,
   });
-  final SmsConsoleController controller;
+  final SmsConsoleCubit cubit;
+  final SmsConsoleState state;
   final bool isDark;
   final VoidCallback onToggleTheme;
   @override
   Widget build(BuildContext context) {
     final compact = MediaQuery.sizeOf(context).width <= 600;
-    final delivered = controller.history
+    final delivered = state.history
         .where((message) => message.status == DeliveryStatus.delivered)
         .length;
     final summary = [
       _SummarySignal(
         Icons.mark_chat_read_outlined,
-        '${controller.history.length}',
+        '${state.history.length}',
         'recent',
       ),
       _SummarySignal(Icons.check_circle_outline, '$delivered', 'delivered'),
       _SummarySignal(
         Icons.account_balance_wallet_outlined,
-        controller.cost?.totalCost.format() ?? '—',
+        state.cost?.totalCost.format() ?? '—',
         'provider spend',
       ),
     ];
@@ -118,34 +123,33 @@ class _Header extends StatelessWidget {
                 ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 220),
                   child: DropdownButtonFormField<Tenant>(
-                    initialValue: controller.tenant,
+                    initialValue: state.tenant,
                     isExpanded: true,
                     decoration: const InputDecoration(
                       labelText: 'Active tenant',
                       isDense: true,
                     ),
-                    items: SmsConsoleController.tenants
+                    items: SmsConsoleCubit.tenants
                         .map(
                           (t) =>
                               DropdownMenuItem(value: t, child: Text(t.name)),
                         )
                         .toList(),
                     onChanged: (t) {
-                      if (t != null) controller.switchTenant(t);
+                      if (t != null) cubit.switchTenant(t);
                     },
                   ),
                 )
               else
                 PopupMenuButton<Tenant>(
                   tooltip: 'Change active tenant',
-                  onSelected: controller.switchTenant,
-                  itemBuilder: (_) => SmsConsoleController.tenants
+                  onSelected: cubit.switchTenant,
+                  itemBuilder: (_) => SmsConsoleCubit.tenants
                       .map((t) => PopupMenuItem(value: t, child: Text(t.name)))
                       .toList(),
                   child: Semantics(
                     button: true,
-                    label:
-                        'Active tenant ${controller.tenant.name}. Change tenant',
+                    label: 'Active tenant ${state.tenant.name}. Change tenant',
                     child: Container(
                       constraints: const BoxConstraints(minHeight: 48),
                       padding: const EdgeInsets.symmetric(
@@ -159,7 +163,7 @@ class _Header extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            controller.tenant.name.split(' ').first,
+                            state.tenant.name.split(' ').first,
                             style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
                           const SizedBox(width: Spacing.xxs),
@@ -181,7 +185,7 @@ class _Header extends StatelessWidget {
                   ),
                 ),
               IconButton(
-                onPressed: controller.loading ? null : controller.refresh,
+                onPressed: state.loading ? null : cubit.refresh,
                 tooltip: 'Refresh dashboard',
                 icon: const Icon(Icons.refresh),
               ),
@@ -235,21 +239,22 @@ class _SummarySignal extends StatelessWidget {
 }
 
 class _Body extends StatelessWidget {
-  const _Body(this.c);
-  final SmsConsoleController c;
+  const _Body(this.cubit, this.state);
+  final SmsConsoleCubit cubit;
+  final SmsConsoleState state;
   @override
   Widget build(BuildContext context) {
-    if (c.loading && c.history.isEmpty) {
+    if (state.loading && state.history.isEmpty) {
       return const Center(
         child: CircularProgressIndicator(semanticsLabel: 'Loading SMS console'),
       );
     }
-    if (c.error != null && c.history.isEmpty) {
+    if (state.error != null && state.history.isEmpty) {
       return StatePanel(
         icon: Icons.cloud_off_outlined,
         title: 'Could not load this tenant',
-        message: c.error!,
-        onRetry: c.refresh,
+        message: state.error!,
+        onRetry: cubit.refresh,
       );
     }
     return LayoutBuilder(
@@ -259,16 +264,16 @@ class _Body extends StatelessWidget {
             SectionCard(
               title: 'Send a message',
               child: SendSmsForm(
-                sending: c.sending,
-                retryAfterSeconds: c.retryAfterSeconds,
-                onSend: c.send,
+                sending: state.sending,
+                retryAfterSeconds: state.retryAfterSeconds,
+                onSend: cubit.send,
               ),
             ),
             const SizedBox(height: Spacing.lg),
-            _Costs(c),
+            _Costs(state),
           ],
         );
-        final history = _History(c);
+        final history = _History(cubit, state);
         return SingleChildScrollView(
           padding: const EdgeInsets.all(Spacing.lg),
           child: ConstrainedBox(
@@ -285,7 +290,7 @@ class _Body extends StatelessWidget {
                     )
                   : Column(
                       children: [
-                        _TenantLabel(c.tenant),
+                        _TenantLabel(state.tenant),
                         const SizedBox(height: Spacing.md),
                         left,
                         const SizedBox(height: Spacing.lg),
@@ -311,11 +316,11 @@ class _TenantLabel extends StatelessWidget {
 }
 
 class _Costs extends StatelessWidget {
-  const _Costs(this.c);
-  final SmsConsoleController c;
+  const _Costs(this.state);
+  final SmsConsoleState state;
   @override
   Widget build(BuildContext context) {
-    final cost = c.cost;
+    final cost = state.cost;
     if (cost == null) return const SizedBox.shrink();
     return SectionCard(
       title: 'Current spend',
@@ -349,20 +354,21 @@ class _Costs extends StatelessWidget {
 }
 
 class _History extends StatelessWidget {
-  const _History(this.c);
-  final SmsConsoleController c;
+  const _History(this.cubit, this.state);
+  final SmsConsoleCubit cubit;
+  final SmsConsoleState state;
   @override
   Widget build(BuildContext context) {
-    final currency = c.cost?.currency ?? 'EUR';
+    final currency = state.cost?.currency ?? 'EUR';
     return SectionCard(
       title: 'Message history',
       trailing: Text(
-        '${c.history.length} recent',
+        '${state.history.length} recent',
         style: Theme.of(context).textTheme.labelLarge,
       ),
       child: Column(
         children: [
-          if (c.receipt != null)
+          if (state.receipt != null)
             Container(
               margin: const EdgeInsets.only(bottom: Spacing.md),
               padding: const EdgeInsets.all(Spacing.md),
@@ -376,20 +382,20 @@ class _History extends StatelessWidget {
                   const SizedBox(width: Spacing.sm),
                   Expanded(
                     child: Text(
-                      'Accepted by ${c.receipt!.provider}. Delivery is still pending.',
+                      'Accepted by ${state.receipt!.provider}. Delivery is still pending.',
                     ),
                   ),
                 ],
               ),
             ),
-          if (c.error != null)
+          if (state.error != null)
             StatePanel(
               icon: Icons.warning_amber,
               title: 'Latest action failed',
-              message: c.error!,
-              onRetry: c.refresh,
+              message: state.error!,
+              onRetry: cubit.refresh,
             ),
-          if (c.history.isEmpty)
+          if (state.history.isEmpty)
             const StatePanel(
               icon: Icons.inbox_outlined,
               title: 'No messages yet',
@@ -397,22 +403,22 @@ class _History extends StatelessWidget {
                   'Send your first transactional SMS to see delivery activity here.',
             )
           else ...[
-            for (final item in c.history) ...[
+            for (final item in state.history) ...[
               HistoryTile(item: item, currency: currency),
               const Divider(height: 1),
             ],
-            if (c.nextCursor != null)
+            if (state.nextCursor != null)
               Padding(
                 padding: const EdgeInsets.only(top: Spacing.lg),
                 child: OutlinedButton.icon(
-                  onPressed: c.loadingMore ? null : c.loadMore,
-                  icon: c.loadingMore
+                  onPressed: state.loadingMore ? null : cubit.loadMore,
+                  icon: state.loadingMore
                       ? const SizedBox.square(
                           dimension: 18,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.expand_more),
-                  label: Text(c.loadingMore ? 'Loading…' : 'Load more'),
+                  label: Text(state.loadingMore ? 'Loading…' : 'Load more'),
                 ),
               ),
           ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'data/fake_sms_repository.dart';
 import 'domain/sms_repository.dart';
 import 'presentation/sms_console_controller.dart';
@@ -14,17 +15,17 @@ class SmsApp extends StatefulWidget {
 
 class _SmsAppState extends State<SmsApp> {
   var _dark = false;
-  late final SmsConsoleController controller;
+  late final SmsConsoleCubit cubit;
   @override
   void initState() {
     super.initState();
-    controller = SmsConsoleController(widget.repository ?? FakeSmsRepository())
+    cubit = SmsConsoleCubit(widget.repository ?? FakeSmsRepository())
       ..initialize();
   }
 
   @override
   void dispose() {
-    controller.dispose();
+    cubit.close();
     super.dispose();
   }
 
@@ -35,10 +36,12 @@ class _SmsAppState extends State<SmsApp> {
     theme: AppTheme.light,
     darkTheme: AppTheme.dark,
     themeMode: _dark ? ThemeMode.dark : ThemeMode.light,
-    home: SmsConsolePage(
-      controller: controller,
-      isDark: _dark,
-      onToggleTheme: () => setState(() => _dark = !_dark),
+    home: BlocProvider.value(
+      value: cubit,
+      child: SmsConsolePage(
+        isDark: _dark,
+        onToggleTheme: () => setState(() => _dark = !_dark),
+      ),
     ),
   );
 }

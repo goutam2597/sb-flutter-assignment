@@ -1,22 +1,24 @@
-# ADR 0001: ChangeNotifier state and adaptive composition
+# ADR 0001: Cubit state management and adaptive composition
 
 ## Context
 
-The console coordinates three asynchronous workflows: sending, cost loading, and opaque-cursor history pagination. It must also discard stale results when a tenant changes. The assignment is one screen with a 6–8 hour budget, but the state transitions must remain independently testable and widgets must contain no repository logic.
+The console coordinates initial cost/history loading, sending, rate-limit countdowns, refresh, and opaque-cursor pagination. Tenant changes must immediately clear scoped data and reject stale responses. These transitions must be testable without rendering widgets, while the project remains proportional to a single-screen take-home.
 
 ## Decision
 
-Use one `SmsConsoleController` based on Flutter's `ChangeNotifier`, injected with an abstract `SmsRepository`. The controller owns request flags, typed results, user-safe errors, pagination cursors, and a monotonically increasing tenant generation. A result may update state only when its captured generation still matches.
+Use `flutter_bloc` with one `SmsConsoleCubit` and immutable `SmsConsoleState`. The Cubit is injected with `SmsRepository`; widgets render state through `BlocBuilder` and invoke commands through `context.read<SmsConsoleCubit>()`. State contains typed results, independent loading flags, user-safe error text, the current tenant, pagination cursor, accepted receipt, and rate-limit seconds.
 
-Use `LayoutBuilder` at a 900 px content breakpoint. Narrow layouts form a single scrollable column; wide layouts use a fixed 410 px action rail beside a flexible history workspace. Components receive data and callbacks rather than repositories: `SendSmsForm`, `CostBreakdownRow`, `HistoryTile`, and `StatePanel`.
+Each asynchronous operation captures the tenant ID and a monotonically increasing generation. It may emit a result only when both still match. `close()` cancels the countdown timer. This makes concurrency and cleanup part of the state boundary rather than widget lifecycle code.
+
+Use `LayoutBuilder` at a 900 px content breakpoint. Narrow layouts form one scrollable column; wide layouts use a fixed 410 px action rail beside a flexible history workspace. Reusable components receive typed values and callbacks, never repositories.
 
 ## Alternatives considered
 
-- **Cubit / flutter_bloc:** excellent explicit transitions and test tooling, but adds a dependency and state-class ceremony for this small screen. It becomes preferable if more SMS workflows or independently owned features arrive.
-- **Riverpod:** strong dependency composition and cancellation patterns, but introduces provider concepts that exceed the current scope.
-- **Full Bloc:** events are valuable for complex concurrency, but verbose for three direct commands.
-- **StatefulWidget-only:** lowest setup cost, rejected because repository calls and tenant/security rules would become coupled to widget lifetime and hard to test.
+- **Full event-based Bloc:** explicit events help large workflows, but add ceremony when the public API is only `refresh`, `send`, `loadMore`, and `switchTenant`.
+- **Riverpod:** strong dependency composition and cancellation, but introduces provider concepts beyond this screen's needs.
+- **ChangeNotifier:** initially attractive because it is SDK-only, but mutable public fields and coarse notifications make async transitions less explicit.
+- **StatefulWidget-only:** rejected because repository, billing, and tenant-security rules would couple to widget lifetime and become difficult to test.
 
 ## Consequences
 
-The approach uses only Flutter SDK primitives, is easy to inject in tests, and makes tenant invalidation visible. The downside is mutable controller state and coarse listener notifications; large features could rebuild too broadly or make transitions harder to inspect. If the screen grows, migrate behind the existing repository/component boundaries to Cubit without changing the data layer.
+State transitions are explicit, immutable, observable, and independently testable. Bloc adds one runtime dependency and developers must understand emission ordering. A single state object can rebuild more of the page than necessary; `BlocSelector` can narrow rebuilds if profiling later shows a real cost.

@@ -1,12 +1,14 @@
 # AI usage
 
-Codex was used to inspect the assignment and API contract, propose the feature boundaries, scaffold the typed domain/repository/controller layers, implement the adaptive Flutter UI, and draft tests and documentation. Every generated file was subsequently read and checked against the contract.
+Codex was used to inspect the assignment and API contract, propose feature boundaries, scaffold the typed domain/repository/Cubit layers, implement the adaptive Flutter UI, and draft tests and documentation. Every generated file was subsequently read and checked against the contract.
 
 ## A concrete mistake and correction
 
 The first generated fake repository returned cursors as decimal offsets and parsed them with `int.tryParse`. That violated the contract's rule that cursors are opaque to clients. It was replaced with opaque cursor tokens stored in a private lookup map; presentation code now only passes the returned string through unchanged. A regression test requests the next page using the exact returned token.
 
 The first generated `Money` type also stored only fixed-scale units. Arithmetic was exact, but it could add EUR to USD. Currency is now part of the value object, equality includes currency, and mixed-currency addition throws. Tests cover both exact `0.0079 × 3 = 0.0237` and currency rejection.
+
+An initial state layer used `ChangeNotifier`. Although functional, it did not match the selected Bloc architecture and exposed mutable fields. It was replaced with `flutter_bloc` Cubit and immutable `SmsConsoleState`; the UI now uses `BlocProvider`/`BlocBuilder`, and concurrency tests exercise the Cubit directly.
 
 ## Areas manually reviewed
 

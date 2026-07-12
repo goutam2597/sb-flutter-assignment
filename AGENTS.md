@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-The repository root contains the assignment, API contract, Part 1 review, and submission landing page. The Flutter application is under `starter/`. Inside it, `lib/domain/` defines exact money, typed failures, SMS records, and repository interfaces; `lib/data/` supplies the contract-faithful fake; `lib/presentation/` contains the controller, adaptive page, and reusable widgets; and `lib/theme/` centralizes Material 3 themes and spacing. Architecture rationale lives in `starter/docs/adr/`, while AI disclosure is in `starter/AI-USAGE.md`. The original insecure `starter/lib/sms_console.dart` remains an unimported Part 1 audit artifact and is excluded from analysis.
+The repository root contains the assignment, API contract, Part 1 review, and submission landing page. The Flutter application is under `starter/`. Inside it, `lib/domain/` defines exact money, typed failures, SMS records, and repository interfaces; `lib/data/` supplies fake and HTTP adapters; `lib/presentation/` contains Cubit state, the adaptive page, and reusable widgets; and `lib/theme/` centralizes Material 3 themes and spacing. Architecture rationale lives in `starter/docs/adr/`, while AI disclosure is in `starter/AI-USAGE.md`. The original insecure `starter/lib/sms_console.dart` remains an unimported Part 1 audit artifact and is excluded from analysis.
 
 ## Build, Test, and Development Commands
 
@@ -22,7 +22,7 @@ Use Dart formatter output and the rules in `starter/analysis_options.yaml`. Keep
 
 ## Testing Guidelines
 
-Tests use `flutter_test`. Add regressions near the relevant layer: money and auth in unit tests, tenant races in controller tests, and customer-visible behavior in widget tests. Golden changes must be intentional and visually reviewed.
+Tests use `flutter_test`. Add regressions near the relevant layer: money/auth/network mapping in unit tests, tenant races in Cubit tests, and customer-visible behavior in widget tests. Golden changes must be intentional and visually reviewed.
 
 ## Commit & Pull Request Guidelines
 

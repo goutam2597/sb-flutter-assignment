@@ -25,9 +25,9 @@ flutter test --update-goldens test/golden_test.dart
 
 ### Architecture and state management
 
-Widgets depend on a `SmsConsoleController`, never on networking. The controller is a lean `ChangeNotifier` state machine that coordinates initial loading, refresh, sending, and load-more operations. The repository remains an interface so a production HTTP implementation can replace the fake without presentation changes.
+Widgets consume immutable `SmsConsoleState` through `BlocBuilder` and send commands to `SmsConsoleCubit`; they never perform networking. The Cubit coordinates loading, refresh, sending, rate-limit recovery, tenant changes, and pagination.
 
-The detailed trade-off is recorded in [ADR 0001](docs/adr/0001-state-management-and-adaptive-layout.md). ChangeNotifier was chosen for proportionality: one screen and no third-party state dependency. The important boundary is not the package name; it is that tenant, money, pagination, retry, and duplicate-submit rules are outside widgets and directly testable.
+The detailed trade-off is recorded in [ADR 0001](docs/adr/0001-state-management-and-adaptive-layout.md). Cubit was chosen over full event-based Bloc because the command surface is small but still benefits from immutable, observable async transitions.
 
 ```text
 lib/
@@ -37,7 +37,7 @@ lib/
 │   └── sms_repository.dart          repository + refresh-once decorator
 ├── data/fake_sms_repository.dart    contract-faithful local implementation
 ├── presentation/
-│   ├── sms_console_controller.dart  async state and tenant generation
+│   ├── sms_console_controller.dart  Cubit, immutable state, tenant generation
 │   ├── sms_console_page.dart        adaptive page composition
 │   └── widgets.dart                 reusable customer-facing components
 └── theme/app_theme.dart             Material 3 themes and spacing tokens
@@ -51,7 +51,9 @@ lib/
 
 `SmsRepository` exposes typed send, history, and cost results. `FakeSmsRepository` is the default runtime dependency and simulates bounded latency, seeded masked recipients, accepted send responses, exact provider costs, opaque cursor tokens, and typed failures. Tests can set a failure deterministically without exposing scenario controls in the customer UI.
 
-A real HTTP repository would implement the same interface, parse JSON only inside model/data factories, take its HTTPS base URL from environment configuration, and attach both `Authorization: Bearer …` and `X-Tenant-Id` through a shared client. Permanent provider credentials never belong in Flutter. `RefreshingSmsRepository` performs one refresh and one retry after unauthorized; refresh failure or a second unauthorized response becomes `SessionFailure`, preventing loops.
+`HttpSmsRepository` reconstructs the starter's network intent safely. It requires HTTPS, obtains a short-lived token from an injected provider, attaches `Authorization` and `X-Tenant-Id`, sends typed JSON, forwards opaque cursors, applies timeouts, and maps `400`, `401`, `403`, `429`/`Retry-After`, and `502` into typed failures. Supply the base URL with `--dart-define=SMS_API_BASE_URL=https://…`; credentials are never compiled into the app.
+
+`RefreshingSmsRepository` decorates a repository and performs one refresh plus one retry after unauthorized; refresh failure or a second unauthorized response becomes `SessionFailure`, preventing loops. Permanent provider credentials never belong in Flutter.
 
 ### Tenant isolation
 
@@ -59,7 +61,7 @@ Tenant switching immediately clears cost, history, receipt, cursor, and error st
 
 ### Customer states and component boundaries
 
-- `SendSmsForm` owns controllers and validation presentation; it receives only `sending` and an async callback. It disables submission in flight, while the controller provides a second duplicate guard.
+- `SendSmsForm` owns text controllers and validation presentation; it receives only send state and an async callback. It disables submission in flight, while the Cubit provides a second duplicate guard.
 - `CostBreakdownRow` receives a typed provider row and renders authoritative cost/message count. It never invents a recipient.
 - `HistoryTile` displays already-masked recipients, status text/icon, segment count, ID, and cost.
 - `StatePanel` provides consistent empty/error/retry states.
@@ -77,9 +79,13 @@ Material 3 light and dark themes centralize `ColorScheme`, surfaces, inputs, car
 - Exact fixed-scale multiplication and decimal validation.
 - Mixed-currency addition rejection.
 - Opaque cursor round trip.
+- Required authorization and tenant headers on HTTP requests.
+- HTTPS-only base URL enforcement and typed JSON parsing.
+- `429 Retry-After`, `502`, timeout, and malformed-response mapping.
 - Unauthorized → refresh → retry exactly once.
 - Refresh failure terminates as session-expired.
 - Slow Tenant A cannot overwrite Tenant B.
+- Rapid duplicate sends produce one billable repository call.
 - Invalid phone validation performs no send.
 - Provider failure stops progress and restores the send action.
 - Successful send is labelled accepted, never delivered.
@@ -95,7 +101,7 @@ Actual Android and desktop screenshots are intentionally not included yet becaus
 
 Within the time-box, this submission does not implement a real HTTP backend, bulk SMS, full sign-in UI, secure-device token persistence, WebSockets, localization, analytics, or elaborate animation. The contract defines no push endpoint, so history uses manual refresh.
 
-With another week I would add a production HTTP adapter with model parsing fixtures and header-interceptor tests, secure token storage integrated with the real identity flow, cancellation in addition to generation checks, status progression in the fake, rate-limit countdown UI, more screen-reader testing, Android/Windows/Web platform runs, and real screenshots at 360 and 1400 px.
+With another week I would connect the HTTP adapter to the real identity flow and secure token storage, add cancellation in addition to generation checks, expand status progression in the fake, perform screen-reader testing, run Android/Windows/Web targets, and capture real screenshots at 360 and 1400 px.
 
 ## Security posture
 

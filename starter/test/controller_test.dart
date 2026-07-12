@@ -36,12 +36,34 @@ class _TenantRaceRepository implements SmsRepository {
       throw UnimplementedError();
 }
 
+class _SendSpyRepository implements SmsRepository {
+  final sendCompleter = Completer<SendReceipt>();
+  int sendCalls = 0;
+
+  @override
+  Future<CostBreakdown> costs(String tenantId) async =>
+      CostBreakdown('EUR', Money.zero('EUR'), const []);
+
+  @override
+  Future<MessagePage> messages(
+    String tenantId, {
+    String? cursor,
+    int limit = 50,
+  }) async => const MessagePage([], null);
+
+  @override
+  Future<SendReceipt> send(String tenantId, SendRequest request) {
+    sendCalls++;
+    return sendCompleter.future;
+  }
+}
+
 void main() {
   test('slow tenant A cannot overwrite tenant B state', () async {
     final repository = _TenantRaceRepository();
-    final controller = SmsConsoleController(repository);
-    unawaited(controller.initialize());
-    await controller.switchTenant(SmsConsoleController.tenants.last);
+    final cubit = SmsConsoleCubit(repository);
+    unawaited(cubit.initialize());
+    await cubit.switchTenant(SmsConsoleCubit.tenants.last);
     repository.a.complete(
       MessagePage([
         MessageRecord(
@@ -55,7 +77,33 @@ void main() {
       ], null),
     );
     await Future<void>.delayed(Duration.zero);
-    expect(controller.tenant.id, 'orbit');
-    expect(controller.history.single.messageId, 'ORBIT');
+    expect(cubit.state.tenant.id, 'orbit');
+    expect(cubit.state.history.single.messageId, 'ORBIT');
+    await cubit.close();
   });
+
+  test(
+    'rapid duplicate sends create only one billable repository call',
+    () async {
+      final repository = _SendSpyRepository();
+      final cubit = SmsConsoleCubit(repository);
+      await cubit.initialize();
+      final first = cubit.send('+4915112345678', 'Hello');
+      final second = await cubit.send('+4915112345678', 'Hello');
+      expect(second, isFalse);
+      expect(repository.sendCalls, 1);
+      repository.sendCompleter.complete(
+        SendReceipt(
+          messageId: 'SM1',
+          provider: 'TWILIO',
+          status: DeliveryStatus.accepted,
+          segmentCount: 1,
+          cost: Money.parse('0.0750', 'EUR'),
+          currency: 'EUR',
+        ),
+      );
+      expect(await first, isTrue);
+      await cubit.close();
+    },
+  );
 }
