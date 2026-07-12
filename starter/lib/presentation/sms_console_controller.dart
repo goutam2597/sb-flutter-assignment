@@ -136,7 +136,7 @@ class SmsConsoleCubit extends Cubit<SmsConsoleState> {
         SendRequest(to: to.trim(), body: body.trim()),
       );
       if (!_isCurrent(generation, tenantId)) return false;
-      emit(state.copyWith(receipt: receipt));
+      emit(state.copyWith(receipt: receipt, sending: false));
       _logger.info(AppLogEvent.sendAccepted);
       await refresh();
       return true;
@@ -148,13 +148,16 @@ class SmsConsoleCubit extends Cubit<SmsConsoleState> {
     } on SmsFailure catch (failure, stackTrace) {
       _logger.error(AppLogEvent.sendRejected, failure, stackTrace);
       if (_isCurrent(generation, tenantId)) {
-        emit(state.copyWith(error: failure.message));
+        emit(state.copyWith(error: failure.message, sending: false));
       }
     } catch (error, stackTrace) {
       _logger.error(AppLogEvent.sendRejected, error, stackTrace);
       if (_isCurrent(generation, tenantId)) {
         emit(
-          state.copyWith(error: 'The request did not complete. Please retry.'),
+          state.copyWith(
+            error: 'The request did not complete. Please retry.',
+            sending: false,
+          ),
         );
       }
     } finally {
@@ -212,6 +215,7 @@ class SmsConsoleCubit extends Cubit<SmsConsoleState> {
       state.copyWith(
         error: 'Try again in $seconds seconds.',
         retryAfterSeconds: seconds,
+        sending: false,
       ),
     );
     _rateLimitTimer = Timer.periodic(const Duration(seconds: 1), (timer) {

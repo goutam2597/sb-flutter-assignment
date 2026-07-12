@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../domain/models.dart';
-import '../theme/app_theme.dart';
+import '../../domain/models.dart';
+import '../../theme/app_theme.dart';
 
 class SectionCard extends StatelessWidget {
   const SectionCard({
@@ -199,18 +199,26 @@ class _SendSmsFormState extends State<SendSmsForm> {
                         body.clear();
                       }
                     },
-              icon: widget.sending
-                  ? const SizedBox.square(
-                      dimension: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.send_outlined),
-              label: Text(
-                widget.sending
-                    ? 'Submitting…'
-                    : widget.retryAfterSeconds > 0
-                    ? 'Retry in ${widget.retryAfterSeconds}s'
-                    : 'Send SMS',
+              icon: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: widget.sending
+                    ? const SizedBox.square(
+                        key: ValueKey('loading'),
+                        dimension: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.send_outlined, key: ValueKey('icon')),
+              ),
+              label: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: Text(
+                  widget.sending
+                      ? 'Submitting…'
+                      : widget.retryAfterSeconds > 0
+                      ? 'Retry in ${widget.retryAfterSeconds}s'
+                      : 'Send SMS',
+                  key: ValueKey(widget.sending ? 'submitting' : widget.retryAfterSeconds),
+                ),
               ),
             ),
           ),

@@ -170,8 +170,9 @@ I ran Part 4 on 12 July 2026:
 
 ### What I noticed across platforms
 
-- At 360 px I needed a compact labelled tenant button, a shorter subtitle, two summary signals, and one scrolling column.
-- At 1400 px I used a 410 px action/spend rail and gave the remaining width to history. I capped the content instead of stretching it edge to edge.
+- At 360 px I needed a compact labelled tenant button, one scrolling column, and a `FloatingActionButton` that opens a sleek modal dialog to compose SMS messages.
+- At 1400 px I used a 410 px action/spend rail and gave the remaining width to history. I capped the content instead of stretching it edge to edge, transitioning smoothly between the mobile and desktop states using `AnimatedSwitcher` and `AnimatedContainer`.
+- To support a premium desktop/mobile feel, I implemented a custom "pure black" OLED dark mode that forces `#000000` backgrounds with distinct white borders, overriding the default Material tinted surfaces.
 - `SafeArea` kept the Pixel status and navigation areas clear.
 - Android and Chrome use different font metrics. Flexible rows and no fixed text heights prevented clipping in the captures.
 - Flutter Web uses a canvas, so normal browser DOM automation does not see all controls until Flutter's accessibility bridge is active. I therefore kept widget semantics tests as well as visual browser checks.

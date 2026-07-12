@@ -12,8 +12,16 @@ void main() {
       SmsApp(repository: FakeSmsRepository(delay: Duration.zero)),
     );
     await tester.pumpAndSettle();
+    
+    final fab = find.byType(FloatingActionButton);
+    if (tester.any(fab)) {
+      await tester.tap(fab);
+      await tester.pumpAndSettle();
+    }
+    
     await tester.enterText(find.byType(TextFormField).first, '123');
     await tester.enterText(find.byType(TextFormField).last, 'Hello');
+    await tester.ensureVisible(find.text('Send SMS'));
     await tester.tap(find.text('Send SMS'));
     await tester.pump();
     expect(find.text('Use international E.164 format'), findsOneWidget);
@@ -26,8 +34,16 @@ void main() {
     await tester.pumpWidget(SmsApp(repository: repository));
     await tester.pumpAndSettle();
     repository.failure = const ProviderFailure();
+    
+    final fab = find.byType(FloatingActionButton);
+    if (tester.any(fab)) {
+      await tester.tap(fab);
+      await tester.pumpAndSettle();
+    }
+    
     await tester.enterText(find.byType(TextFormField).first, '+4915112345678');
     await tester.enterText(find.byType(TextFormField).last, 'Hello');
+    await tester.ensureVisible(find.text('Send SMS'));
     await tester.tap(find.text('Send SMS'));
     await tester.pumpAndSettle();
     expect(find.textContaining('provider is unavailable'), findsOneWidget);
@@ -41,8 +57,16 @@ void main() {
       SmsApp(repository: FakeSmsRepository(delay: Duration.zero)),
     );
     await tester.pumpAndSettle();
+    
+    final fab = find.byType(FloatingActionButton);
+    if (tester.any(fab)) {
+      await tester.tap(fab);
+      await tester.pumpAndSettle();
+    }
+    
     await tester.enterText(find.byType(TextFormField).first, '+4915112345678');
     await tester.enterText(find.byType(TextFormField).last, 'Hello');
+    await tester.ensureVisible(find.text('Send SMS'));
     await tester.tap(find.text('Send SMS'));
     await tester.pump(const Duration(seconds: 1));
     expect(find.textContaining('Accepted by TWILIO'), findsOneWidget);

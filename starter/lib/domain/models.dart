@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 enum DeliveryStatus { accepted, sent, delivered, failed }
 
 class Money {
@@ -23,8 +25,10 @@ class Money {
   }
 
   Money times(int count) => Money._(units * count, currency);
-  String format() =>
-      '$currency ${(units ~/ 10000)}.${(units % 10000).toString().padLeft(4, '0')}';
+  String format() {
+    final symbol = NumberFormat.simpleCurrency(name: currency).currencySymbol;
+    return '$symbol${(units ~/ 10000)}.${(units % 10000).toString().padLeft(4, '0')}';
+  }
   @override
   bool operator ==(Object other) =>
       other is Money && other.units == units && other.currency == currency;

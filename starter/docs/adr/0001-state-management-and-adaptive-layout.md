@@ -14,7 +14,9 @@ The Cubit receives `SmsRepository`. Widgets read state through `BlocBuilder` and
 
 For tenant isolation, every async operation captures the current tenant and a generation number. The operation can emit only if both still match when it completes. I cancel the rate-limit timer when the Cubit closes.
 
-For layout, I use `LayoutBuilder` with a 900 px breakpoint. Below the breakpoint I show one scrollable column. Above it I use a 410 px send/spend rail and a flexible history area. Reusable widgets receive typed data and callbacks rather than the Cubit or repository where that is not needed.
+For layout, I use `LayoutBuilder` with an 900 px breakpoint. Below the breakpoint I show one scrollable column with a native `AppBar` and a `FloatingActionButton` that opens a custom modal dialogue for sending messages. Above it I use a 410 px send/spend rail and a flexible history area. I wrapped the responsive switches in `AnimatedSwitcher` and `AnimatedContainer` to ensure fluid layout transitions as the window resizes, making it feel like a premium desktop application.
+
+To support the aesthetic requirement of "not feeling like an afterthought", I also designed a custom "pure black" OLED-style dark mode. This overrides the default Material tinted surfaces, locking all dialogs, app bars, and backgrounds to true black (`#000000`), with distinct white borders for spatial separation.
 
 ## Alternatives I considered
 

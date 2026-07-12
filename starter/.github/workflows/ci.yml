@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.x'
+
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: starter
+
+      - name: Format
+        run: dart format --output=none --set-exit-if-changed lib test
+        working-directory: starter
+
+      - name: Analyze
+        run: flutter analyze
+        working-directory: starter
+
+      - name: Run tests
+        run: flutter test
+        working-directory: starter
