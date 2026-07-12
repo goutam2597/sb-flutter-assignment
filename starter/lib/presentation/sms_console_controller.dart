@@ -88,7 +88,7 @@ class SmsConsoleCubit extends Cubit<SmsConsoleState> {
     _logger.debug(AppLogEvent.refreshStarted);
     final generation = ++_generation;
     final tenantId = state.tenant.id;
-    emit(state.copyWith(loading: true, clearError: true));
+    emit(state.copyWith(loading: true, clearError: true, loadingMore: false));
     try {
       final results = await Future.wait([
         repository.costs(tenantId),
@@ -109,7 +109,7 @@ class SmsConsoleCubit extends Cubit<SmsConsoleState> {
     } on SmsFailure catch (failure, stackTrace) {
       _logger.error(AppLogEvent.refreshFailed, failure, stackTrace);
       if (_isCurrent(generation, tenantId)) {
-        emit(state.copyWith(error: failure.message, loading: false));
+        emit(state.copyWith(error: failure.message, loading: false, loadingMore: false));
       }
     } catch (error, stackTrace) {
       _logger.error(AppLogEvent.refreshFailed, error, stackTrace);
@@ -177,7 +177,10 @@ class SmsConsoleCubit extends Cubit<SmsConsoleState> {
     emit(state.copyWith(loadingMore: true, clearError: true));
     try {
       final page = await repository.messages(tenantId, cursor: cursor, limit: 12);
-      if (!_isCurrent(generation, tenantId)) return;
+      if (!_isCurrent(generation, tenantId)) {
+        emit(state.copyWith(loadingMore: false));
+        return;
+      }
       emit(
         state.copyWith(
           history: List.unmodifiable([...state.history, ...page.items]),
