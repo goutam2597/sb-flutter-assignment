@@ -93,15 +93,35 @@ Material 3 light and dark themes centralize `ColorScheme`, surfaces, inputs, car
 
 ## Platform notes and screenshots
 
-The layout is implemented and golden-tested at 360 px. Desktop composition activates at 900 px and is constrained for 1400 px windows. Mobile keyboards reduce usable height, so the entire body scrolls; desktop users need mouse-wheel scrolling, focus indication, resizing, and selectable IDs. Native font metrics can shift wrapping, and web text selection differs from mobile gestures.
+Part 4 was run on two real targets on 12 July 2026:
 
-Actual Android and desktop screenshots are intentionally not included yet because those platform runs have not been performed in this environment. Add only real captures after running both targets; do not substitute fabricated images.
+- **Android:** Pixel 7 Pro connected wirelessly, Android 17 / API 37, Impeller Vulkan renderer.
+- **Web:** Chrome 150 on Windows, explicitly resized to 360×900 and 1400×900.
+
+### Verified captures
+
+| Android — Pixel 7 Pro | Chrome Web — 360×900 |
+|---|---|
+| <img src="docs/screenshots/android-pixel-7-pro.png" width="280" alt="Butterfly SMS running on a Pixel 7 Pro"> | <img src="docs/screenshots/web-360.png" width="280" alt="Butterfly SMS in Chrome at 360 by 900 pixels"> |
+
+#### Chrome Web — 1400×900
+
+![Butterfly SMS desktop two-column layout](docs/screenshots/web-1400.png)
+
+### What actually changed or needed attention
+
+- At 360 px, the desktop tenant field becomes a compact labelled tenant button, the refresh action is reduced, the operational strip shows two signals, and all content becomes one scrollable column.
+- At 1400 px, the content is capped rather than stretched: send and spend occupy a 410 px rail while history uses the remaining workspace. All seven seeded messages fit without turning the desktop into a wide phone card.
+- The Pixel status/navigation areas are respected through `SafeArea`; the send action and tenant selector remain comfortably thumb-sized.
+- Native Android and Chrome use different font metrics. Flexible rows, unfixed text heights, and the shortened mobile subtitle prevented clipping in the captured runs.
+- Flutter Web renders through a canvas. Browser automation can resize and capture it, but its controls do not appear in the normal accessibility tree until Flutter's accessibility bridge is enabled. Semantics and focus behavior are therefore also protected by widget tests rather than relying only on DOM automation.
+- Message IDs are `SelectableText` for mouse-based desktop support. Touch selection, physical-keyboard traversal, and screen-reader behavior should still be checked manually on the final release devices.
 
 ## Deliberate cuts and another week
 
 Within the time-box, this submission does not implement a real HTTP backend, bulk SMS, full sign-in UI, secure-device token persistence, WebSockets, localization, analytics, or elaborate animation. The contract defines no push endpoint, so history uses manual refresh.
 
-With another week I would connect the HTTP adapter to the real identity flow and secure token storage, add cancellation in addition to generation checks, expand status progression in the fake, perform screen-reader testing, run Android/Windows/Web targets, and capture real screenshots at 360 and 1400 px.
+With another week I would connect the HTTP adapter to the real identity flow and secure token storage, add cancellation in addition to generation checks, expand status progression in the fake, perform TalkBack/VoiceOver testing, and add iOS, Windows, and macOS runs to the verified Android/Web matrix.
 
 ## Security posture
 
