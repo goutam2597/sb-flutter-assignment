@@ -273,15 +273,23 @@ I ran Part 4 on 12 July 2026.
 - Chrome 150 on Windows at 360×900
 - Chrome 150 on Windows at 1400×900
 
-| Home (Pixel 7 Pro) | History (Pixel 7 Pro) | Dialog (Pixel 7 Pro) |
+### Mobile (Pixel 7 Pro)
+
+**Light Mode**
+| Home | History | Dialog |
 |---|---|---|
-| <img src="screenshots/mobile-home.png" width="280" alt="Butterfly SMS Home on Pixel 7 Pro"> | <img src="screenshots/mobile-history.png" width="280" alt="Butterfly SMS History on Pixel 7 Pro"> | <img src="screenshots/mobile-dialog.png" width="280" alt="Butterfly SMS Send Dialog on Pixel 7 Pro"> |
+| <img src="screenshots/mobile-home.png" width="260" alt="Butterfly SMS Home Light"> | <img src="screenshots/mobile-history.png" width="260" alt="Butterfly SMS History Light"> | <img src="screenshots/mobile-dialog.png" width="260" alt="Butterfly SMS Dialog Light"> |
+
+**Dark Mode**
+| Home | History | Dialog |
+|---|---|---|
+| <img src="screenshots/dark-mobile-home.png" width="260" alt="Butterfly SMS Home Dark"> | <img src="screenshots/dark-mobile-history.png" width="260" alt="Butterfly SMS History Dark"> | <img src="screenshots/dark-mobile-dialog.png" width="260" alt="Butterfly SMS Dialog Dark"> |
 
 ### Chrome Desktop (1400×900 and 360x900)
 
-| Web (1400×900) | Web Mobile View (360×900) |
-|---|---|
-| <img src="screenshots/web-desktop.png" width="480" alt="Desktop two-column SMS console"> | <img src="screenshots/web-360.png" width="280" alt="Butterfly SMS in Chrome at 360 by 900"> |
+| Web Light (1400×900) | Web Dark (1400×900) | Web Mobile View (360×900) |
+|---|---|---|
+| <img src="screenshots/web-desktop.png" width="360" alt="Desktop Light"> | <img src="screenshots/dark-web-desktop.png" width="360" alt="Desktop Dark"> | <img src="screenshots/web-360.png" width="260" alt="Web Mobile Light"> |
 
 ### What I noticed across platforms
 
