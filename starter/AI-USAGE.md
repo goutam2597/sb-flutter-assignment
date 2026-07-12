@@ -1,15 +1,24 @@
 # AI usage
 
-Codex was used to inspect the assignment and API contract, propose feature boundaries, scaffold the typed domain/repository/Cubit layers, implement the adaptive Flutter UI, and draft tests and documentation. Every generated file was subsequently read and checked against the contract.
+Codex was used heavily as an implementation partner. It read the assignment and contract, proposed feature boundaries, scaffolded the fixed-scale money and repository layers, generated the first Cubit/UI/test drafts, and drafted the README, ADR, and CI workflow. I reviewed the resulting files against the contract, ran the application on Chrome and a physical Pixel 7 Pro, and kept only behavior I can explain and defend.
 
-## A concrete mistake and correction
+## Concrete mistakes caught and replaced
 
-The first generated fake repository returned cursors as decimal offsets and parsed them with `int.tryParse`. That violated the contract's rule that cursors are opaque to clients. It was replaced with opaque cursor tokens stored in a private lookup map; presentation code now only passes the returned string through unchanged. A regression test requests the next page using the exact returned token.
+1. The first fake repository represented cursors as decimal offsets and parsed them with `int.tryParse`. That violated the contract's opaque-cursor rule. It was replaced with private token-to-position lookup; presentation code only passes the returned string back. Repository tests protect the round trip.
+2. The first `Money` value stored exact fixed-scale units but no currency, allowing EUR and USD to be added. Currency is now part of identity and mixed-currency addition throws. Tests cover `0.0079 × 3 = 0.0237`, malformed decimals, and currency mismatch.
+3. The initial state draft used mutable `ChangeNotifier` fields. That did not match the selected Bloc architecture. It was replaced with `flutter_bloc`, immutable `SmsConsoleState`, and `SmsConsoleCubit`; tenant-race and duplicate-send tests exercise it without widgets.
+4. The first CI draft ran a Windows-generated golden on Ubuntu, producing 18 passes and one pixel-comparison failure. CI now runs platform-neutral tests on Ubuntu and the tagged golden on a pinned Windows job.
 
-The first generated `Money` type also stored only fixed-scale units. Arithmetic was exact, but it could add EUR to USD. Currency is now part of the value object, equality includes currency, and mixed-currency addition throws. Tests cover both exact `0.0079 × 3 = 0.0237` and currency rejection.
+## Work manually owned and reviewed
 
-An initial state layer used `ChangeNotifier`. Although functional, it did not match the selected Bloc architecture and exposed mutable fields. It was replaced with `flutter_bloc` Cubit and immutable `SmsConsoleState`; the UI now uses `BlocProvider`/`BlocBuilder`, and concurrency tests exercise the Cubit directly.
+I manually reviewed the mechanisms where generated code was not trusted by default:
 
-## Areas manually reviewed
+- fixed-scale arithmetic, currency equality, formatting, and use of authoritative server cost;
+- the request generation/tenant checks that reject stale Tenant A results after switching to Tenant B;
+- refresh-once behavior, including refresh failure and second-401 termination;
+- HTTP headers, HTTPS enforcement, timeout/status mapping, and the absence of token or recipient logging;
+- recipient masking and the rule that cost rows never invent phone numbers;
+- `202 ACCEPTED` copy, duplicate billable-send protection, and rate-limit recovery;
+- every regression assertion, the committed golden, physical Android output, and both web breakpoints.
 
-Money parsing/arithmetic, tenant generation checks, refresh-once behavior, recipient masking, error copy, and the absence of credentials/recipient logging were reviewed line by line. Analyzer output alone was not accepted as proof of contract compliance.
+AI output was therefore treated as a draft requiring contract review, not as evidence of correctness. Analyzer, tests, real platform runs, and the documented manual checks are the evidence used for this submission.

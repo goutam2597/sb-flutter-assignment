@@ -1,5 +1,7 @@
 # Studio Butterfly Flutter Assignment
 
+[![Flutter checks](https://github.com/goutam2597/sb-flutter-assignment/actions/workflows/flutter.yml/badge.svg)](https://github.com/goutam2597/sb-flutter-assignment/actions/workflows/flutter.yml)
+
 This repository contains the Studio Butterfly SMS Console take-home submission.
 
 - [Implementation overview and run instructions](starter/README.md)

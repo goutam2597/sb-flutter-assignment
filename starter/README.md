@@ -15,6 +15,8 @@ flutter analyze
 flutter test
 ```
 
+CI pins Flutter 3.44.5. Platform-neutral analysis and tests run on Ubuntu; the tagged golden runs separately on Windows because rasterized golden pixels are OS-specific. This keeps the visual assertion active rather than silently accepting cross-platform pixel drift.
+
 Regenerate the committed golden only when intentionally reviewing a visual change:
 
 ```bash
