@@ -270,16 +270,16 @@ flutter test test/golden_test.dart: 1 passed
 I ran Part 4 on 12 July 2026.
 
 - Pixel 7 Pro over wireless ADB, Android 17/API 37, Impeller Vulkan
-- Chrome 150 on Windows at 360Ã—900
-- Chrome 150 on Windows at 1400Ã—900
+- Chrome 150 on Windows at 360×900
+- Chrome 150 on Windows at 1400×900
 
-| Pixel 7 Pro | Chrome at 360Ã—900 |
-|---|---|
-| <img src="screenshots/android-pixel-7-pro.png" width="280" alt="Butterfly SMS on Pixel 7 Pro"> | <img src="screenshots/web-360.png" width="280" alt="Butterfly SMS in Chrome at 360 by 900"> |
+| Home (Pixel 7 Pro) | History (Pixel 7 Pro) | Dialog (Pixel 7 Pro) |
+|---|---|---|
+| <img src="screenshots/mobile-home.png" width="280" alt="Butterfly SMS Home on Pixel 7 Pro"> | <img src="screenshots/mobile-history.png" width="280" alt="Butterfly SMS History on Pixel 7 Pro"> | <img src="screenshots/mobile-dialog.png" width="280" alt="Butterfly SMS Send Dialog on Pixel 7 Pro"> |
 
-### Chrome at 1400Ã—900
+### Chrome Desktop (1400×900)
 
-![Desktop two-column SMS console](screenshots/web-1400.png)
+![Desktop two-column SMS console](screenshots/web-desktop.png)
 
 ### What I noticed across platforms
 
