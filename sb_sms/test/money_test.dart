@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:starter/domain/models.dart';
+import 'package:sb_sms/domain/models.dart';
 
 void main() {
   test('four-decimal multiplication is exact', () {

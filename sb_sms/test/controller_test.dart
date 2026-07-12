@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:starter/domain/models.dart';
-import 'package:starter/domain/sms_repository.dart';
-import 'package:starter/presentation/sms_console_controller.dart';
+import 'package:sb_sms/domain/models.dart';
+import 'package:sb_sms/domain/sms_repository.dart';
+import 'package:sb_sms/presentation/sms_console_controller.dart';
 
 class _TenantRaceRepository implements SmsRepository {
   final a = Completer<MessagePage>();

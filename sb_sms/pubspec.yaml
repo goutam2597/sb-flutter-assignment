@@ -1,4 +1,4 @@
-name: starter
+name: sb_sms
 description: Studio Butterfly multi-tenant SMS console take-home.
 publish_to: none
 version: 1.0.0+1

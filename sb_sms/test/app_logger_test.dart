@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:logger/logger.dart';
-import 'package:starter/core/logging/app_logger.dart';
+import 'package:sb_sms/core/logging/app_logger.dart';
 
 class _MemoryOutput extends LogOutput {
   final lines = <String>[];

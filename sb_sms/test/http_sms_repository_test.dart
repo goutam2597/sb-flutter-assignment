@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:starter/data/http_sms_repository.dart';
-import 'package:starter/domain/models.dart';
+import 'package:sb_sms/data/http_sms_repository.dart';
+import 'package:sb_sms/domain/models.dart';
 
 class _Tokens implements AccessTokenProvider {
   @override

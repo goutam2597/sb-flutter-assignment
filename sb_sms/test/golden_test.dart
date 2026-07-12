@@ -4,8 +4,8 @@ library;
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:starter/app.dart';
-import 'package:starter/data/fake_sms_repository.dart';
+import 'package:sb_sms/app.dart';
+import 'package:sb_sms/data/fake_sms_repository.dart';
 
 void main() {
   testWidgets('360px loaded light theme', (tester) async {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:starter/app.dart';
-import 'package:starter/data/fake_sms_repository.dart';
-import 'package:starter/domain/models.dart';
+import 'package:sb_sms/app.dart';
+import 'package:sb_sms/data/fake_sms_repository.dart';
+import 'package:sb_sms/domain/models.dart';
 
 void main() {
   testWidgets('invalid recipient shows a useful validation error', (
