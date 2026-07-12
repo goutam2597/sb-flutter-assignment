@@ -277,9 +277,11 @@ I ran Part 4 on 12 July 2026.
 |---|---|---|
 | <img src="screenshots/mobile-home.png" width="280" alt="Butterfly SMS Home on Pixel 7 Pro"> | <img src="screenshots/mobile-history.png" width="280" alt="Butterfly SMS History on Pixel 7 Pro"> | <img src="screenshots/mobile-dialog.png" width="280" alt="Butterfly SMS Send Dialog on Pixel 7 Pro"> |
 
-### Chrome Desktop (1400×900)
+### Chrome Desktop (1400×900 and 360x900)
 
-![Desktop two-column SMS console](screenshots/web-desktop.png)
+| Web (1400×900) | Web Mobile View (360×900) |
+|---|---|
+| <img src="screenshots/web-desktop.png" width="480" alt="Desktop two-column SMS console"> | <img src="screenshots/web-360.png" width="280" alt="Butterfly SMS in Chrome at 360 by 900"> |
 
 ### What I noticed across platforms
 
