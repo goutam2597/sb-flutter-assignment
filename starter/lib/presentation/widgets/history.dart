@@ -24,7 +24,7 @@ class MessageHistory extends StatefulWidget {
 
 class _MessageHistoryState extends State<MessageHistory> {
   int _currentPage = 0;
-  static const int _pageSize = 5;
+  static const int _pageSize = 12;
 
   @override
   void didUpdateWidget(MessageHistory oldWidget) {
@@ -175,21 +175,29 @@ class _MessageHistoryState extends State<MessageHistory> {
                               widget.state.loadingMore;
 
                           return Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 2.0,
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 2.0),
                             child: isLoadingThisPage
-                                ? const SizedBox.square(
-                                    dimension: 24,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
+                              ? const SizedBox.square(dimension: 36, child: Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                ))
+                              : isCurrent
+                                  ? FilledButton(
+                                      style: FilledButton.styleFrom(
+                                        minimumSize: const Size(36, 36),
+                                        padding: EdgeInsets.zero,
+                                      ),
+                                      onPressed: () {},
+                                      child: Text('${index + 1}'),
+                                    )
+                                  : TextButton(
+                                      style: TextButton.styleFrom(
+                                        minimumSize: const Size(36, 36),
+                                        padding: EdgeInsets.zero,
+                                      ),
+                                      onPressed: () => _goToPage(index),
+                                      child: Text('${index + 1}'),
                                     ),
-                                  )
-                                : ChoiceChip(
-                                    label: Text('${index + 1}'),
-                                    selected: isCurrent,
-                                    onSelected: (_) => _goToPage(index),
-                                  ),
                           );
                         },
                       ),
