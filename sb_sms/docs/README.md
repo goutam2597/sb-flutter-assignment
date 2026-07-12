@@ -124,7 +124,7 @@ It provides:
 
 `HttpSmsRepository` is the real network boundary.
 
-I rebuilt the useful intent from the starter.
+I rebuilt the useful intent from the sb_sms.
 
 I did not reuse its unsafe constants or request code.
 

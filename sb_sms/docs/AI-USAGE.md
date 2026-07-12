@@ -8,7 +8,7 @@ I used Codex for most of the code generation, refactoring, and test scaffolding.
 
 I used Antigravity for in-editor assistance, exploration, and quick iteration while building out the UI and wiring the state.
 
-I gave the tools the assignment, the API contract, and the starter code.
+I gave the tools the assignment, the API contract, and the sb_sms code.
 
 I then used them to help scaffold models, repositories, Cubit state, widgets, tests, documentation, and CI.
 
