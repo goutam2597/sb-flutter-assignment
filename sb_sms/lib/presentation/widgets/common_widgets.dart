@@ -217,7 +217,9 @@ class _SendSmsFormState extends State<SendSmsForm> {
                       : widget.retryAfterSeconds > 0
                       ? 'Retry in ${widget.retryAfterSeconds}s'
                       : 'Send SMS',
-                  key: ValueKey(widget.sending ? 'submitting' : widget.retryAfterSeconds),
+                  key: ValueKey(
+                    widget.sending ? 'submitting' : widget.retryAfterSeconds,
+                  ),
                 ),
               ),
             ),

@@ -29,6 +29,7 @@ class Money {
     final symbol = NumberFormat.simpleCurrency(name: currency).currencySymbol;
     return '$symbol${(units ~/ 10000)}.${(units % 10000).toString().padLeft(4, '0')}';
   }
+
   @override
   bool operator ==(Object other) =>
       other is Money && other.units == units && other.currency == currency;

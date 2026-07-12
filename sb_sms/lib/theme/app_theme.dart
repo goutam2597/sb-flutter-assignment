@@ -11,7 +11,7 @@ abstract final class AppTheme {
     const Color(0xff0ea5e9), // Sky 500
   );
   static ThemeData get dark => _theme(
-    Brightness.dark, 
+    Brightness.dark,
     const Color(0xff818cf8), // Indigo 400
     const Color(0xff38bdf8), // Sky 400
   );
@@ -39,7 +39,7 @@ abstract final class AppTheme {
         onSurfaceVariant: Colors.white.withValues(alpha: 0.7),
       );
     }
-    
+
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
@@ -54,7 +54,9 @@ abstract final class AppTheme {
         foregroundColor: isDark ? Colors.white : scheme.onPrimaryContainer,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: isDark ? const BorderSide(color: Colors.white54, width: 1) : BorderSide.none,
+          side: isDark
+              ? const BorderSide(color: Colors.white54, width: 1)
+              : BorderSide.none,
         ),
       ),
       dialogTheme: DialogThemeData(
@@ -62,7 +64,9 @@ abstract final class AppTheme {
         surfaceTintColor: isDark ? Colors.transparent : null,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
-          side: isDark ? const BorderSide(color: Colors.white54, width: 1) : BorderSide.none,
+          side: isDark
+              ? const BorderSide(color: Colors.white54, width: 1)
+              : BorderSide.none,
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -70,15 +74,24 @@ abstract final class AppTheme {
         fillColor: scheme.surfaceContainerLow,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: isDark ? const BorderSide(color: Colors.white54, width: 1) : BorderSide.none,
+          borderSide: isDark
+              ? const BorderSide(color: Colors.white54, width: 1)
+              : BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: isDark ? Colors.white24 : scheme.outlineVariant.withValues(alpha: 0.3)),
+          borderSide: BorderSide(
+            color: isDark
+                ? Colors.white24
+                : scheme.outlineVariant.withValues(alpha: 0.3),
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: isDark ? Colors.white : scheme.primary, width: 2),
+          borderSide: BorderSide(
+            color: isDark ? Colors.white : scheme.primary,
+            width: 2,
+          ),
         ),
         contentPadding: const EdgeInsets.all(Spacing.lg),
       ),
@@ -90,7 +103,9 @@ abstract final class AppTheme {
         surfaceTintColor: isDark ? Colors.transparent : null,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
-          side: isDark ? const BorderSide(color: Colors.white24, width: 1) : BorderSide.none,
+          side: isDark
+              ? const BorderSide(color: Colors.white24, width: 1)
+              : BorderSide.none,
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -101,10 +116,14 @@ abstract final class AppTheme {
           disabledBackgroundColor: scheme.surfaceContainerHighest,
           disabledForegroundColor: scheme.onSurfaceVariant,
           elevation: 4,
-          shadowColor: isDark ? Colors.transparent : scheme.primary.withValues(alpha: 0.4),
+          shadowColor: isDark
+              ? Colors.transparent
+              : scheme.primary.withValues(alpha: 0.4),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: isDark ? const BorderSide(color: Colors.white54, width: 1) : BorderSide.none,
+            side: isDark
+                ? const BorderSide(color: Colors.white54, width: 1)
+                : BorderSide.none,
           ),
         ),
       ),

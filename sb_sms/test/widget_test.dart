@@ -12,13 +12,13 @@ void main() {
       SmsApp(repository: FakeSmsRepository(delay: Duration.zero)),
     );
     await tester.pumpAndSettle();
-    
+
     final fab = find.byType(FloatingActionButton);
     if (tester.any(fab)) {
       await tester.tap(fab);
       await tester.pumpAndSettle();
     }
-    
+
     await tester.enterText(find.byType(TextFormField).first, '123');
     await tester.enterText(find.byType(TextFormField).last, 'Hello');
     await tester.ensureVisible(find.text('Send SMS'));
@@ -34,13 +34,13 @@ void main() {
     await tester.pumpWidget(SmsApp(repository: repository));
     await tester.pumpAndSettle();
     repository.failure = const ProviderFailure();
-    
+
     final fab = find.byType(FloatingActionButton);
     if (tester.any(fab)) {
       await tester.tap(fab);
       await tester.pumpAndSettle();
     }
-    
+
     await tester.enterText(find.byType(TextFormField).first, '+4915112345678');
     await tester.enterText(find.byType(TextFormField).last, 'Hello');
     await tester.ensureVisible(find.text('Send SMS'));
@@ -57,13 +57,13 @@ void main() {
       SmsApp(repository: FakeSmsRepository(delay: Duration.zero)),
     );
     await tester.pumpAndSettle();
-    
+
     final fab = find.byType(FloatingActionButton);
     if (tester.any(fab)) {
       await tester.tap(fab);
       await tester.pumpAndSettle();
     }
-    
+
     await tester.enterText(find.byType(TextFormField).first, '+4915112345678');
     await tester.enterText(find.byType(TextFormField).last, 'Hello');
     await tester.ensureVisible(find.text('Send SMS'));
