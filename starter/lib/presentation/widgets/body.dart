@@ -9,7 +9,12 @@ import 'layout_info.dart';
 import 'metric_dashboard.dart';
 
 class SmsConsoleBody extends StatelessWidget {
-  const SmsConsoleBody(this.cubit, this.state, {required this.layout, super.key});
+  const SmsConsoleBody(
+    this.cubit,
+    this.state, {
+    required this.layout,
+    super.key,
+  });
 
   final SmsConsoleCubit cubit;
   final SmsConsoleState state;
