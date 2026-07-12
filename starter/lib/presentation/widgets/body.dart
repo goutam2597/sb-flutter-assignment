@@ -78,7 +78,7 @@ class SmsConsoleBody extends StatelessWidget {
                 ],
                 MetricDashboard(state, layout: layout),
                 const SizedBox(height: Spacing.xl),
-                history,
+                RepaintBoundary(child: history),
               ],
             ),
           ),

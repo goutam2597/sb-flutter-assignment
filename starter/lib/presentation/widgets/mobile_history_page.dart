@@ -183,9 +183,16 @@ class _MobileHistoryPageState extends State<MobileHistoryPage> {
       );
     }
 
+    // Total items = error banner (0 or 1) + filtered items + footer (1).
+    final hasError = state.error != null && filtered.isEmpty;
+    final errorOffset = hasError ? 1 : 0;
+    final showFooter = _query.isEmpty;
+    final footerOffset = showFooter ? 1 : 0;
+    final totalItems = errorOffset + filtered.length + footerOffset;
+
     return RefreshIndicator(
       onRefresh: cubit.refresh,
-      child: ListView(
+      child: ListView.builder(
         controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(
@@ -194,9 +201,11 @@ class _MobileHistoryPageState extends State<MobileHistoryPage> {
           Spacing.md,
           Spacing.lg,
         ),
-        children: [
-          if (state.error != null && filtered.isEmpty)
-            Padding(
+        itemCount: totalItems,
+        itemBuilder: (context, index) {
+          // Error banner slot
+          if (hasError && index == 0) {
+            return Padding(
               padding: const EdgeInsets.only(bottom: Spacing.md),
               child: StatePanel(
                 icon: Icons.warning_amber,
@@ -204,35 +213,58 @@ class _MobileHistoryPageState extends State<MobileHistoryPage> {
                 message: state.error!,
                 onRetry: cubit.refresh,
               ),
-            ),
+            );
+          }
 
-          // Titleless card holding the message list (no more "Page N").
-          Container(
+          // Footer slot
+          if (showFooter && index == totalItems - 1) {
+            return _buildFooter(context, state);
+          }
+
+          // Message item slot
+          final itemIndex = index - errorOffset;
+          final isFirst = itemIndex == 0;
+          final isLast = itemIndex == filtered.length - 1;
+
+          return Container(
             decoration: BoxDecoration(
               color: scheme.surface,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: scheme.outlineVariant.withValues(alpha: 0.5),
+              border: Border(
+                left: BorderSide(
+                  color: scheme.outlineVariant.withValues(alpha: 0.5),
+                ),
+                right: BorderSide(
+                  color: scheme.outlineVariant.withValues(alpha: 0.5),
+                ),
+                top: isFirst
+                    ? BorderSide(
+                        color: scheme.outlineVariant.withValues(alpha: 0.5),
+                      )
+                    : BorderSide.none,
+                bottom: BorderSide(
+                  color: isLast
+                      ? scheme.outlineVariant.withValues(alpha: 0.5)
+                      : scheme.outlineVariant.withValues(alpha: 0.2),
+                ),
+              ),
+              borderRadius: isFirst && isLast
+                  ? BorderRadius.circular(16)
+                  : isFirst
+                      ? const BorderRadius.vertical(top: Radius.circular(16))
+                      : isLast
+                          ? const BorderRadius.vertical(
+                              bottom: Radius.circular(16))
+                          : null,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              child: HistoryTile(
+                item: filtered[itemIndex],
+                currency: currency,
               ),
             ),
-            clipBehavior: Clip.antiAlias,
-            child: Column(
-              children: [
-                for (int i = 0; i < filtered.length; i++) ...[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                    child: HistoryTile(item: filtered[i], currency: currency),
-                  ),
-                  if (i < filtered.length - 1) const Divider(height: 1),
-                ],
-              ],
-            ),
-          ),
-
-          // Footer: shows a spinner while the next page loads on scroll,
-          // and an end-of-list hint once everything is loaded.
-          if (_query.isEmpty) _buildFooter(context, state),
-        ],
+          );
+        },
       ),
     );
   }
