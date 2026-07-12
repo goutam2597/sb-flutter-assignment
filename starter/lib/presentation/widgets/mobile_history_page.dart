@@ -250,18 +250,14 @@ class _MobileHistoryPageState extends State<MobileHistoryPage> {
               borderRadius: isFirst && isLast
                   ? BorderRadius.circular(16)
                   : isFirst
-                      ? const BorderRadius.vertical(top: Radius.circular(16))
-                      : isLast
-                          ? const BorderRadius.vertical(
-                              bottom: Radius.circular(16))
-                          : null,
+                  ? const BorderRadius.vertical(top: Radius.circular(16))
+                  : isLast
+                  ? const BorderRadius.vertical(bottom: Radius.circular(16))
+                  : null,
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              child: HistoryTile(
-                item: filtered[itemIndex],
-                currency: currency,
-              ),
+              child: HistoryTile(item: filtered[itemIndex], currency: currency),
             ),
           );
         },

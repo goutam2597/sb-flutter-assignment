@@ -95,6 +95,50 @@ I fixed this by entirely replacing the hash-based generation with explicit, hard
 
 This also fixed the issue where the AI hadn't generated any `DeliveryStatus.failed` records to test the UI's error states.
 
+### Scroll performance: eager list building caused scroll jank
+
+The AI generated the mobile "All Messages" history page using `ListView(children: [...])` with a `for` loop that eagerly built every single message tile inside a `Container > Column`. This meant all 30+ items were laid out and painted upfront on every frame — even the ones completely off-screen. On a real device (Pixel 7 Pro), the list visibly stuttered during fast scrolling.
+
+The same problem existed on the home screen, where the `MessageHistory` widget sat inside a `SingleChildScrollView`. Because there was no `RepaintBoundary`, the entire history section was repainted on every scroll frame of the parent, even though its content hadn't changed.
+
+**What was generated:**
+```dart
+// mobile_history_page.dart — builds ALL items eagerly
+ListView(
+  children: [
+    Container(
+      child: Column(
+        children: [
+          for (int i = 0; i < filtered.length; i++) ...[
+            HistoryTile(item: filtered[i], currency: currency),
+            if (i < filtered.length - 1) const Divider(height: 1),
+          ],
+        ],
+      ),
+    ),
+  ],
+);
+```
+
+**What I replaced it with:**
+```dart
+// mobile_history_page.dart — lazy building, only visible items are rendered
+ListView.builder(
+  controller: _scrollController,
+  itemCount: totalItems,
+  itemBuilder: (context, index) {
+    // Each item built on demand with per-item border decoration
+    return Container(
+      decoration: BoxDecoration(/* per-item rounded borders */),
+      child: HistoryTile(item: filtered[itemIndex], currency: currency),
+    );
+  },
+);
+
+// body.dart — prevents unnecessary repaints during parent scroll
+RepaintBoundary(child: history);
+```
+
 
 ## What I reviewed myself
 
