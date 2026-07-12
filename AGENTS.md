@@ -20,6 +20,8 @@ Run Flutter commands from `starter/`:
 
 Use Dart formatter output and the rules in `starter/analysis_options.yaml`. Keep repository and financial logic out of widgets. Model API results with typed immutable classes; do not introduce `dynamic` casts at call sites. Monetary values remain fixed-scale decimal strings converted to `Money`, never `double`. Preserve opaque cursors and generation checks when editing pagination or tenant flows.
 
+Use `starter/lib/core/logging/app_logger.dart` for operational debug logging. Do not instantiate `Logger` elsewhere and never add recipients, message bodies, tenant IDs, tokens, headers, or full URLs to log events. New events must be fixed `AppLogEvent` values; exception messages are intentionally not logged.
+
 ## Testing Guidelines
 
 Tests use `flutter_test`. Add regressions near the relevant layer: money/auth/network mapping in unit tests, tenant races in Cubit tests, and customer-visible behavior in widget tests. Golden changes must be intentional and visually reviewed.

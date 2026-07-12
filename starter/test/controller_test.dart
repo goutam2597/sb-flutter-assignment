@@ -103,6 +103,7 @@ void main() {
         ),
       );
       expect(await first, isTrue);
+      expect(cubit.state.sending, isFalse);
       await cubit.close();
     },
   );

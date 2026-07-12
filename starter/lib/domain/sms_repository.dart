@@ -1,3 +1,4 @@
+import '../core/logging/app_logger.dart';
 import 'models.dart';
 
 abstract interface class SmsRepository {
@@ -16,18 +17,26 @@ abstract interface class TokenRefresher {
 
 /// Retries an unauthorized call once and never exposes or logs credentials.
 class RefreshingSmsRepository implements SmsRepository {
-  RefreshingSmsRepository(this.inner, this.refresher);
+  RefreshingSmsRepository(this.inner, this.refresher, {AppLogger? logger})
+    : _logger = logger ?? AppLogger.instance;
   final SmsRepository inner;
   final TokenRefresher refresher;
+  final AppLogger _logger;
 
   Future<T> _once<T>(Future<T> Function() operation) async {
     try {
       return await operation();
     } on UnauthorizedFailure {
-      if (!await refresher.refresh()) throw const SessionFailure();
+      _logger.info(AppLogEvent.tokenRefreshStarted);
+      if (!await refresher.refresh()) {
+        _logger.warning(AppLogEvent.sessionExpired);
+        throw const SessionFailure();
+      }
+      _logger.info(AppLogEvent.tokenRefreshCompleted);
       try {
         return await operation();
       } on UnauthorizedFailure {
+        _logger.warning(AppLogEvent.sessionExpired);
         throw const SessionFailure();
       }
     }

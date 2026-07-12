@@ -1,24 +1,43 @@
-# AI usage
+# How I used AI
 
-Codex was used heavily as an implementation partner. It read the assignment and contract, proposed feature boundaries, scaffolded the fixed-scale money and repository layers, generated the first Cubit/UI/test drafts, and drafted the README, ADR, and CI workflow. I reviewed the resulting files against the contract, ran the application on Chrome and a physical Pixel 7 Pro, and kept only behavior I can explain and defend.
+I used Codex heavily during this assignment. I gave it the assignment, API contract, and starter code, then used it to scaffold models, repositories, Cubit state, widgets, tests, documentation, and CI.
 
-## Concrete mistakes caught and replaced
+I did not accept a clean analyzer result as proof that the implementation was correct. I read the generated code against the contract, ran the failure cases, tested on Android and Web, and changed several generated decisions.
 
-1. The first fake repository represented cursors as decimal offsets and parsed them with `int.tryParse`. That violated the contract's opaque-cursor rule. It was replaced with private token-to-position lookup; presentation code only passes the returned string back. Repository tests protect the round trip.
-2. The first `Money` value stored exact fixed-scale units but no currency, allowing EUR and USD to be added. Currency is now part of identity and mixed-currency addition throws. Tests cover `0.0079 × 3 = 0.0237`, malformed decimals, and currency mismatch.
-3. The initial state draft used mutable `ChangeNotifier` fields. That did not match the selected Bloc architecture. It was replaced with `flutter_bloc`, immutable `SmsConsoleState`, and `SmsConsoleCubit`; tenant-race and duplicate-send tests exercise it without widgets.
-4. The first CI draft ran a Windows-generated golden on Ubuntu, producing 18 passes and one pixel-comparison failure. CI now runs platform-neutral tests on Ubuntu and the tagged golden on a pinned Windows job.
+## Where the AI was wrong
 
-## Work manually owned and reviewed
+### Cursor handling
 
-I manually reviewed the mechanisms where generated code was not trusted by default:
+The first fake repository used decimal offsets and parsed cursors with `int.tryParse`. That directly violated the contract because the client must treat the cursor as opaque. I replaced it with a private token-to-position lookup. The UI now only passes the returned string back.
 
-- fixed-scale arithmetic, currency equality, formatting, and use of authoritative server cost;
-- the request generation/tenant checks that reject stale Tenant A results after switching to Tenant B;
-- refresh-once behavior, including refresh failure and second-401 termination;
-- HTTP headers, HTTPS enforcement, timeout/status mapping, and the absence of token or recipient logging;
-- recipient masking and the rule that cost rows never invent phone numbers;
-- `202 ACCEPTED` copy, duplicate billable-send protection, and rate-limit recovery;
-- every regression assertion, the committed golden, physical Android output, and both web breakpoints.
+### Money and currency
 
-AI output was therefore treated as a draft requiring contract review, not as evidence of correctness. Analyzer, tests, real platform runs, and the documented manual checks are the evidence used for this submission.
+The first `Money` type used exact fixed-scale units, but it did not store currency. That meant EUR and USD could be added. I made currency part of the value and added a mixed-currency test.
+
+### State management
+
+The first state layer used `ChangeNotifier`. It was functional, but it did not match the Bloc decision and exposed mutable fields. I replaced it with `SmsConsoleCubit` and immutable state.
+
+### Successful send finalizer
+
+After a successful send, `refresh()` advanced the generation before the send `finally` block ran. The generated guard could therefore leave `sending=true`. I changed the finalizer to check the current tenant and actual sending state, then added a regression assertion.
+
+### CI golden platform
+
+The first CI workflow compared a Windows-generated golden on Ubuntu. GitHub reported 18 passed and one failed. I tagged the golden, kept the platform-neutral suite on Ubuntu, and added a pinned Windows golden job. Both public jobs now pass.
+
+## What I reviewed myself
+
+I manually reviewed and took ownership of:
+
+- fixed-scale money and currency rules;
+- tenant generation checks and the slow-A/fast-B race;
+- authorization headers and refresh-once behavior;
+- the rule that tokens, phone numbers, and message bodies must not be logged;
+- `202 ACCEPTED` wording and duplicate-send protection;
+- every regression test and golden change; and
+- the real Pixel and Chrome captures.
+
+I also asked Codex to add the `logger` package, but I kept it behind `AppLogger` with fixed event names. Exceptions log only their runtime type. I added a test that puts a fake token, full phone number, and message text inside an exception and confirms none of that content reaches the logger output.
+
+AI helped me move faster, but it also produced mistakes that looked reasonable on a quick read. The review, tests, platform runs, and corrections are the parts I consider my engineering work.

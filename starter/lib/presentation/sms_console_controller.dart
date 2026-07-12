@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../core/logging/app_logger.dart';
 import '../domain/models.dart';
 import '../domain/sms_repository.dart';
 
@@ -60,10 +61,12 @@ class SmsConsoleState {
 }
 
 class SmsConsoleCubit extends Cubit<SmsConsoleState> {
-  SmsConsoleCubit(this.repository)
-    : super(const SmsConsoleState(tenant: tenantsFirst));
+  SmsConsoleCubit(this.repository, {AppLogger? logger})
+    : _logger = logger ?? AppLogger.instance,
+      super(const SmsConsoleState(tenant: tenantsFirst));
 
   final SmsRepository repository;
+  final AppLogger _logger;
   static const tenants = [tenantsFirst, Tenant('orbit', 'Orbit Retail')];
   static const tenantsFirst = Tenant('north', 'Northwind Health');
 
@@ -74,6 +77,7 @@ class SmsConsoleCubit extends Cubit<SmsConsoleState> {
 
   Future<void> switchTenant(Tenant tenant) async {
     if (tenant.id == state.tenant.id) return;
+    _logger.info(AppLogEvent.tenantChanged);
     _generation++;
     _rateLimitTimer?.cancel();
     emit(SmsConsoleState(tenant: tenant, loading: true));
@@ -81,6 +85,7 @@ class SmsConsoleCubit extends Cubit<SmsConsoleState> {
   }
 
   Future<void> refresh() async {
+    _logger.debug(AppLogEvent.refreshStarted);
     final generation = ++_generation;
     final tenantId = state.tenant.id;
     emit(state.copyWith(loading: true, clearError: true));
@@ -100,11 +105,14 @@ class SmsConsoleCubit extends Cubit<SmsConsoleState> {
           loading: false,
         ),
       );
-    } on SmsFailure catch (failure) {
+      _logger.debug(AppLogEvent.refreshCompleted);
+    } on SmsFailure catch (failure, stackTrace) {
+      _logger.error(AppLogEvent.refreshFailed, failure, stackTrace);
       if (_isCurrent(generation, tenantId)) {
         emit(state.copyWith(error: failure.message, loading: false));
       }
-    } catch (_) {
+    } catch (error, stackTrace) {
+      _logger.error(AppLogEvent.refreshFailed, error, stackTrace);
       if (_isCurrent(generation, tenantId)) {
         emit(
           state.copyWith(
@@ -118,6 +126,7 @@ class SmsConsoleCubit extends Cubit<SmsConsoleState> {
 
   Future<bool> send(String to, String body) async {
     if (state.sending || state.retryAfterSeconds > 0) return false;
+    _logger.debug(AppLogEvent.sendStarted);
     final generation = _generation;
     final tenantId = state.tenant.id;
     emit(state.copyWith(sending: true, clearError: true, clearReceipt: true));
@@ -128,24 +137,28 @@ class SmsConsoleCubit extends Cubit<SmsConsoleState> {
       );
       if (!_isCurrent(generation, tenantId)) return false;
       emit(state.copyWith(receipt: receipt));
+      _logger.info(AppLogEvent.sendAccepted);
       await refresh();
       return true;
     } on RateLimitFailure catch (failure) {
+      _logger.warning(AppLogEvent.sendRateLimited);
       if (_isCurrent(generation, tenantId)) {
         _startRateLimit(failure.retryAfter);
       }
-    } on SmsFailure catch (failure) {
+    } on SmsFailure catch (failure, stackTrace) {
+      _logger.error(AppLogEvent.sendRejected, failure, stackTrace);
       if (_isCurrent(generation, tenantId)) {
         emit(state.copyWith(error: failure.message));
       }
-    } catch (_) {
+    } catch (error, stackTrace) {
+      _logger.error(AppLogEvent.sendRejected, error, stackTrace);
       if (_isCurrent(generation, tenantId)) {
         emit(
           state.copyWith(error: 'The request did not complete. Please retry.'),
         );
       }
     } finally {
-      if (_isCurrent(generation, tenantId)) {
+      if (!isClosed && tenantId == state.tenant.id && state.sending) {
         emit(state.copyWith(sending: false));
       }
     }
@@ -155,6 +168,7 @@ class SmsConsoleCubit extends Cubit<SmsConsoleState> {
   Future<void> loadMore() async {
     final cursor = state.nextCursor;
     if (state.loadingMore || cursor == null) return;
+    _logger.debug(AppLogEvent.historyPageStarted);
     final generation = _generation;
     final tenantId = state.tenant.id;
     emit(state.copyWith(loadingMore: true, clearError: true));
@@ -169,11 +183,14 @@ class SmsConsoleCubit extends Cubit<SmsConsoleState> {
           loadingMore: false,
         ),
       );
-    } on SmsFailure catch (failure) {
+      _logger.debug(AppLogEvent.historyPageCompleted);
+    } on SmsFailure catch (failure, stackTrace) {
+      _logger.error(AppLogEvent.historyPageFailed, failure, stackTrace);
       if (_isCurrent(generation, tenantId)) {
         emit(state.copyWith(error: failure.message, loadingMore: false));
       }
-    } catch (_) {
+    } catch (error, stackTrace) {
+      _logger.error(AppLogEvent.historyPageFailed, error, stackTrace);
       if (_isCurrent(generation, tenantId)) {
         emit(
           state.copyWith(

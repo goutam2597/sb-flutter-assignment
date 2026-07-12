@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'core/logging/app_logger.dart';
 import 'data/fake_sms_repository.dart';
 import 'domain/sms_repository.dart';
 import 'presentation/sms_console_controller.dart';
@@ -7,8 +8,9 @@ import 'presentation/sms_console_page.dart';
 import 'theme/app_theme.dart';
 
 class SmsApp extends StatefulWidget {
-  const SmsApp({super.key, this.repository});
+  const SmsApp({super.key, this.repository, this.logger});
   final SmsRepository? repository;
+  final AppLogger? logger;
   @override
   State<SmsApp> createState() => _SmsAppState();
 }
@@ -16,11 +18,16 @@ class SmsApp extends StatefulWidget {
 class _SmsAppState extends State<SmsApp> {
   var _dark = false;
   late final SmsConsoleCubit cubit;
+  late final AppLogger logger;
   @override
   void initState() {
     super.initState();
-    cubit = SmsConsoleCubit(widget.repository ?? FakeSmsRepository())
-      ..initialize();
+    logger = widget.logger ?? AppLogger.instance;
+    logger.info(AppLogEvent.appStarted);
+    cubit = SmsConsoleCubit(
+      widget.repository ?? FakeSmsRepository(logger: logger),
+      logger: logger,
+    )..initialize();
   }
 
   @override
@@ -40,7 +47,10 @@ class _SmsAppState extends State<SmsApp> {
       value: cubit,
       child: SmsConsolePage(
         isDark: _dark,
-        onToggleTheme: () => setState(() => _dark = !_dark),
+        onToggleTheme: () {
+          logger.debug(AppLogEvent.themeChanged);
+          setState(() => _dark = !_dark);
+        },
       ),
     ),
   );

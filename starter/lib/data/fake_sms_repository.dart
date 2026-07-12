@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../core/logging/app_logger.dart';
 import '../domain/models.dart';
 import '../domain/sms_repository.dart';
 
@@ -6,16 +7,28 @@ class FakeSmsRepository implements SmsRepository {
   FakeSmsRepository({
     this.delay = const Duration(milliseconds: 350),
     this.failure,
-  });
+    AppLogger? logger,
+  }) : _logger = logger ?? AppLogger.instance;
   final Duration delay;
   SmsFailure? failure;
+  final AppLogger _logger;
   final Map<String, List<MessageRecord>> _records = {};
   final Map<String, int> _cursors = {};
-  Future<T> _bounded<T>(T Function() work) =>
-      Future<T>.delayed(delay, work).timeout(
+  Future<T> _bounded<T>(T Function() work) async {
+    _logger.debug(AppLogEvent.fakeRequestStarted);
+    try {
+      final result = await Future<T>.delayed(delay, work).timeout(
         const Duration(seconds: 8),
         onTimeout: () => throw const OfflineFailure(),
       );
+      _logger.debug(AppLogEvent.fakeRequestCompleted);
+      return result;
+    } catch (error, stackTrace) {
+      _logger.error(AppLogEvent.fakeRequestFailed, error, stackTrace);
+      rethrow;
+    }
+  }
+
   List<MessageRecord> _for(String tenant) => _records.putIfAbsent(
     tenant,
     () => List.generate(

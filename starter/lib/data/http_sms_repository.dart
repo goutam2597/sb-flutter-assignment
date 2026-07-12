@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../core/logging/app_logger.dart';
 import '../domain/models.dart';
 import '../domain/sms_repository.dart';
 
@@ -17,7 +18,9 @@ class HttpSmsRepository implements SmsRepository {
     http.Client? client,
     this.timeout = const Duration(seconds: 10),
     this.historyCurrency = 'EUR',
+    AppLogger? logger,
   }) : _client = client ?? http.Client() {
+    _logger = logger ?? AppLogger.instance;
     if (baseUri.scheme != 'https') {
       throw ArgumentError('The SMS API base URL must use HTTPS');
     }
@@ -28,6 +31,7 @@ class HttpSmsRepository implements SmsRepository {
   final Duration timeout;
   final String historyCurrency;
   final http.Client _client;
+  late final AppLogger _logger;
 
   static Uri? configuredBaseUri() {
     const value = String.fromEnvironment('SMS_API_BASE_URL');
@@ -132,23 +136,32 @@ class HttpSmsRepository implements SmsRepository {
     String tenantId,
     Future<http.Response> Function(Map<String, String>) request,
   ) async {
+    _logger.debug(AppLogEvent.httpRequestStarted);
     final token = await tokens.accessToken();
-    if (token == null || token.isEmpty) throw const UnauthorizedFailure();
+    if (token == null || token.isEmpty) {
+      _logger.warning(AppLogEvent.accessTokenMissing);
+      throw const UnauthorizedFailure();
+    }
     try {
-      return await request({
+      final response = await request({
         'Authorization': 'Bearer $token',
         'X-Tenant-Id': tenantId,
         'Accept': 'application/json',
       }).timeout(timeout);
-    } on TimeoutException {
+      _logger.debug(AppLogEvent.httpRequestCompleted);
+      return response;
+    } on TimeoutException catch (error, stackTrace) {
+      _logger.error(AppLogEvent.httpRequestFailed, error, stackTrace);
       throw const TimeoutFailure();
-    } on http.ClientException {
+    } on http.ClientException catch (error, stackTrace) {
+      _logger.error(AppLogEvent.httpRequestFailed, error, stackTrace);
       throw const OfflineFailure();
     }
   }
 
   void _requireStatus(http.Response response, int expected) {
     if (response.statusCode == expected) return;
+    _logger.warning(AppLogEvent.httpRequestFailed);
     switch (response.statusCode) {
       case 400:
         throw ValidationFailure(_serverMessage(response));
