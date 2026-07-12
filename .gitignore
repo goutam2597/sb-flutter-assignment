@@ -1,0 +1,9 @@
+graphify-out/
+starter/.dart_tool/
+starter/build/
+starter/.idea/
+starter/*.iml
+**/Flutter/ephemeral/
+**/Generated.xcconfig
+**/flutter_export_environment.sh
+*.log
