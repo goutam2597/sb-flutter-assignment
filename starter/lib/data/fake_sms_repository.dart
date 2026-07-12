@@ -33,27 +33,34 @@ class FakeSmsRepository implements SmsRepository {
   // 'north' = Northwind Health: 12 messages, mix of delivered/failed/sent, high spend.
   // 'orbit' = Orbit Retail: 5 messages, mostly delivered, low spend.
   static final Map<String, List<MessageRecord>> _seeds = {
-    'north': [
-      MessageRecord(messageId: 'SMNO001', recipient: '+4915*****701', status: DeliveryStatus.delivered, segmentCount: 1, cost: Money.parse('0.0750', 'EUR'), sentAt: DateTime.utc(2026, 7, 12, 10, 0)),
-      MessageRecord(messageId: 'SMNO002', recipient: '+4915*****702', status: DeliveryStatus.delivered, segmentCount: 2, cost: Money.parse('0.1500', 'EUR'), sentAt: DateTime.utc(2026, 7, 12, 9, 0)),
-      MessageRecord(messageId: 'SMNO003', recipient: '+4915*****703', status: DeliveryStatus.failed,    segmentCount: 1, cost: Money.parse('0.0750', 'EUR'), sentAt: DateTime.utc(2026, 7, 12, 8, 0)),
-      MessageRecord(messageId: 'SMNO004', recipient: '+4915*****704', status: DeliveryStatus.delivered, segmentCount: 1, cost: Money.parse('0.0750', 'EUR'), sentAt: DateTime.utc(2026, 7, 12, 7, 0)),
-      MessageRecord(messageId: 'SMNO005', recipient: '+4915*****705', status: DeliveryStatus.delivered, segmentCount: 2, cost: Money.parse('0.1500', 'EUR'), sentAt: DateTime.utc(2026, 7, 12, 6, 0)),
-      MessageRecord(messageId: 'SMNO006', recipient: '+4915*****706', status: DeliveryStatus.failed,    segmentCount: 1, cost: Money.parse('0.0750', 'EUR'), sentAt: DateTime.utc(2026, 7, 12, 5, 0)),
-      MessageRecord(messageId: 'SMNO007', recipient: '+4915*****707', status: DeliveryStatus.sent,      segmentCount: 1, cost: Money.parse('0.0750', 'EUR'), sentAt: DateTime.utc(2026, 7, 12, 4, 0)),
-      MessageRecord(messageId: 'SMNO008', recipient: '+4915*****708', status: DeliveryStatus.delivered, segmentCount: 2, cost: Money.parse('0.1500', 'EUR'), sentAt: DateTime.utc(2026, 7, 11, 18, 0)),
-      MessageRecord(messageId: 'SMNO009', recipient: '+4915*****709', status: DeliveryStatus.delivered, segmentCount: 1, cost: Money.parse('0.0750', 'EUR'), sentAt: DateTime.utc(2026, 7, 11, 12, 0)),
-      MessageRecord(messageId: 'SMNO010', recipient: '+4915*****710', status: DeliveryStatus.failed,    segmentCount: 2, cost: Money.parse('0.1500', 'EUR'), sentAt: DateTime.utc(2026, 7, 11, 8, 0)),
-      MessageRecord(messageId: 'SMNO011', recipient: '+4915*****711', status: DeliveryStatus.delivered, segmentCount: 1, cost: Money.parse('0.0750', 'EUR'), sentAt: DateTime.utc(2026, 7, 10, 20, 0)),
-      MessageRecord(messageId: 'SMNO012', recipient: '+4915*****712', status: DeliveryStatus.delivered, segmentCount: 1, cost: Money.parse('0.0750', 'EUR'), sentAt: DateTime.utc(2026, 7, 10, 14, 0)),
-    ],
-    'orbit': [
-      MessageRecord(messageId: 'SMOR001', recipient: '+4915*****801', status: DeliveryStatus.delivered, segmentCount: 1, cost: Money.parse('0.0750', 'EUR'), sentAt: DateTime.utc(2026, 7, 12, 11, 0)),
-      MessageRecord(messageId: 'SMOR002', recipient: '+4915*****802', status: DeliveryStatus.delivered, segmentCount: 1, cost: Money.parse('0.0750', 'EUR'), sentAt: DateTime.utc(2026, 7, 12, 8, 30)),
-      MessageRecord(messageId: 'SMOR003', recipient: '+4915*****803', status: DeliveryStatus.failed,    segmentCount: 1, cost: Money.parse('0.0750', 'EUR'), sentAt: DateTime.utc(2026, 7, 12, 6, 0)),
-      MessageRecord(messageId: 'SMOR004', recipient: '+4915*****804', status: DeliveryStatus.delivered, segmentCount: 1, cost: Money.parse('0.0750', 'EUR'), sentAt: DateTime.utc(2026, 7, 11, 22, 0)),
-      MessageRecord(messageId: 'SMOR005', recipient: '+4915*****805', status: DeliveryStatus.sent,      segmentCount: 1, cost: Money.parse('0.0750', 'EUR'), sentAt: DateTime.utc(2026, 7, 11, 16, 0)),
-    ],
+    'north': List.generate(30, (i) {
+      final hour = 12 - (i % 12);
+      final day = 12 - (i ~/ 12);
+      final isFailed = i % 7 == 0;
+      final segmentCount = (i % 3) + 1;
+      return MessageRecord(
+        messageId: 'SMNO${(i + 1).toString().padLeft(3, '0')}',
+        recipient: '+4915*****${700 + i}',
+        status: isFailed ? DeliveryStatus.failed : DeliveryStatus.delivered,
+        segmentCount: segmentCount,
+        cost: Money.parse((0.0750 * segmentCount).toStringAsFixed(4), 'EUR'),
+        sentAt: DateTime.utc(2026, 7, day, hour, 0),
+      );
+    }),
+    'orbit': List.generate(30, (i) {
+      final hour = 16 - (i % 12);
+      final day = 12 - (i ~/ 12);
+      final isFailed = i % 5 == 0;
+      final segmentCount = (i % 2) + 1;
+      return MessageRecord(
+        messageId: 'SMOR${(i + 1).toString().padLeft(3, '0')}',
+        recipient: '+4915*****${800 + i}',
+        status: isFailed ? DeliveryStatus.failed : DeliveryStatus.delivered,
+        segmentCount: segmentCount,
+        cost: Money.parse((0.0750 * segmentCount).toStringAsFixed(4), 'EUR'),
+        sentAt: DateTime.utc(2026, 7, day, hour, 30),
+      );
+    }),
   };
 
   List<MessageRecord> _for(String tenant) => _records.putIfAbsent(

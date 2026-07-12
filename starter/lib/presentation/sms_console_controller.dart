@@ -92,7 +92,7 @@ class SmsConsoleCubit extends Cubit<SmsConsoleState> {
     try {
       final results = await Future.wait([
         repository.costs(tenantId),
-        repository.messages(tenantId),
+        repository.messages(tenantId, limit: 5),
       ]);
       if (!_isCurrent(generation, tenantId)) return;
       final page = results[1] as MessagePage;
@@ -176,7 +176,7 @@ class SmsConsoleCubit extends Cubit<SmsConsoleState> {
     final tenantId = state.tenant.id;
     emit(state.copyWith(loadingMore: true, clearError: true));
     try {
-      final page = await repository.messages(tenantId, cursor: cursor);
+      final page = await repository.messages(tenantId, cursor: cursor, limit: 5);
       if (!_isCurrent(generation, tenantId)) return;
       emit(
         state.copyWith(

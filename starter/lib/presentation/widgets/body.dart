@@ -31,7 +31,7 @@ class SmsConsoleBody extends StatelessWidget {
       );
     }
 
-    final history = MessageHistory(cubit, state);
+    final history = MessageHistory(cubit, state, layout: layout);
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(layout.horizontalPadding),
