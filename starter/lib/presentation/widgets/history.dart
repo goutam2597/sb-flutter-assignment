@@ -175,29 +175,36 @@ class _MessageHistoryState extends State<MessageHistory> {
                               widget.state.loadingMore;
 
                           return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 2.0,
+                            ),
                             child: isLoadingThisPage
-                              ? const SizedBox.square(dimension: 36, child: Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                ))
-                              : isCurrent
-                                  ? FilledButton(
-                                      style: FilledButton.styleFrom(
-                                        minimumSize: const Size(36, 36),
-                                        padding: EdgeInsets.zero,
+                                ? const SizedBox.square(
+                                    dimension: 36,
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
                                       ),
-                                      onPressed: () {},
-                                      child: Text('${index + 1}'),
-                                    )
-                                  : TextButton(
-                                      style: TextButton.styleFrom(
-                                        minimumSize: const Size(36, 36),
-                                        padding: EdgeInsets.zero,
-                                      ),
-                                      onPressed: () => _goToPage(index),
-                                      child: Text('${index + 1}'),
                                     ),
+                                  )
+                                : isCurrent
+                                ? FilledButton(
+                                    style: FilledButton.styleFrom(
+                                      minimumSize: const Size(36, 36),
+                                      padding: EdgeInsets.zero,
+                                    ),
+                                    onPressed: () {},
+                                    child: Text('${index + 1}'),
+                                  )
+                                : TextButton(
+                                    style: TextButton.styleFrom(
+                                      minimumSize: const Size(36, 36),
+                                      padding: EdgeInsets.zero,
+                                    ),
+                                    onPressed: () => _goToPage(index),
+                                    child: Text('${index + 1}'),
+                                  ),
                           );
                         },
                       ),
