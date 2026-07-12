@@ -60,7 +60,9 @@ class SmsConsolePage extends StatelessWidget {
                                 ),
                               ),
                             ),
-                      foregroundColor: isDark ? Colors.white : Theme.of(context).colorScheme.onPrimary,
+                      foregroundColor: isDark
+                          ? Colors.white
+                          : Theme.of(context).colorScheme.onPrimary,
                       actions: [
                         IconButton(
                           onPressed: onToggleTheme,
@@ -124,7 +126,11 @@ class SmsConsolePage extends StatelessWidget {
                               ),
                               const VerticalDivider(width: 1, thickness: 1),
                               Expanded(
-                                child: SmsConsoleBody(cubit, state, layout: layout),
+                                child: SmsConsoleBody(
+                                  cubit,
+                                  state,
+                                  layout: layout,
+                                ),
                               ),
                             ],
                           )
