@@ -30,7 +30,7 @@ I changed several generated decisions where they were wrong.
 
 ## Where the AI Was Wrong
 
-### Send button stuck on "Submittingâ€¦" after a successful send
+### Send button stuck on "Submitting…" after a successful send
 
 The generated `send()` method set `sending: true` at the start.
 
@@ -38,7 +38,7 @@ It only reset it to `false` inside a `finally` block.
 
 That block ran **after** both the API call and a full dashboard `refresh()`.
 
-The button showed a spinner and "Submittingâ€¦" for the entire send-plus-refresh duration.
+The button showed a spinner and "Submitting…" for the entire send-plus-refresh duration.
 
 This was roughly one second with the fake repository.
 
@@ -325,7 +325,7 @@ This meant the entire history section was repainted on every scroll frame of the
 **What was generated:**
 
 ```dart
-// mobile_history_page.dart â€” builds ALL items eagerly
+// mobile_history_page.dart — builds ALL items eagerly
 ListView(
   children: [
     Container(
@@ -345,7 +345,7 @@ ListView(
 **What I replaced it with:**
 
 ```dart
-// mobile_history_page.dart â€” lazy building, only visible items are rendered
+// mobile_history_page.dart — lazy building, only visible items are rendered
 ListView.builder(
   controller: _scrollController,
   itemCount: totalItems,
@@ -358,7 +358,7 @@ ListView.builder(
   },
 );
 
-// body.dart â€” prevents unnecessary repaints during parent scroll
+// body.dart — prevents unnecessary repaints during parent scroll
 RepaintBoundary(child: history);
 ```
 

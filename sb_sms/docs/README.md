@@ -67,19 +67,33 @@ My full reasoning is in [ADR 0001](adr/0001-state-management-and-adaptive-layout
 
 ```text
 lib/
-â”œâ”€â”€ app.dart
-â”œâ”€â”€ core/logging/app_logger.dart
-â”œâ”€â”€ domain/
-â”‚   â”œâ”€â”€ models.dart
-â”‚   â””â”€â”€ sms_repository.dart
-â”œâ”€â”€ data/
-â”‚   â”œâ”€â”€ fake_sms_repository.dart
-â”‚   â””â”€â”€ http_sms_repository.dart
-â”œâ”€â”€ presentation/
-â”‚   â”œâ”€â”€ sms_console_controller.dart
-â”‚   â”œâ”€â”€ sms_console_page.dart
-â”‚   â””â”€â”€ widgets.dart
-â””â”€â”€ theme/app_theme.dart
+├── app.dart
+├── main.dart
+├── sms_console.dart
+├── core/
+│   └── logging/
+│       └── app_logger.dart
+├── data/
+│   ├── fake_sms_repository.dart
+│   └── http_sms_repository.dart
+├── domain/
+│   ├── models.dart
+│   └── sms_repository.dart
+├── presentation/
+│   ├── sms_console_controller.dart
+│   ├── sms_console_page.dart
+│   └── widgets/
+│       ├── body.dart
+│       ├── common_widgets.dart
+│       ├── history.dart
+│       ├── layout_info.dart
+│       ├── metric_dashboard.dart
+│       ├── mobile_history_page.dart
+│       ├── mobile_send_dialog.dart
+│       ├── sidebar.dart
+│       └── widgets.dart
+└── theme/
+    └── app_theme.dart
 ```
 
 I kept the structure small because this is one feature.
@@ -303,7 +317,7 @@ TalkBack, VoiceOver, and full physical-keyboard traversal still need dedicated m
 
 I did not build a backend, bulk SMS UI, complete sign-in flow, secure token persistence, WebSocket client, localization, analytics, or complex animations.
 
-These were outside the 6â€“8 hour assignment priority.
+These were outside the 6–8 hour assignment priority.
 
 Some are not defined by the API contract.
 
